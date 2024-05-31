@@ -19,10 +19,11 @@ builder.Services.AddIdentity<AppUser, AppRole>(op =>
     op.Password.RequiredLength = 1;
 
     op.User.RequireUniqueEmail = true;
+    op.SignIn.RequireConfirmedEmail = true;
     op.Lockout.MaxFailedAccessAttempts = 3;
-    op.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromSeconds(30); 
+    op.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromSeconds(30);
 
-}).AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders(); 
+}).AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

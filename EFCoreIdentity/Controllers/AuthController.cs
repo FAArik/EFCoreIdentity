@@ -9,7 +9,7 @@ namespace EFCoreIdentity.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public sealed class AuthController(UserManager<AppUser> _userManager,SignInManager<AppUser> _signInManager) : ControllerBase
+    public sealed class AuthController(UserManager<AppUser> _userManager, SignInManager<AppUser> _signInManager) : ControllerBase
     {
 
         [HttpPost]
@@ -92,7 +92,7 @@ namespace EFCoreIdentity.Controllers
                 return BadRequest(new { Message = "Kullanıcı adı veya şifre yanlış" });
             }
 
-            return Ok(new { Token = "Token" } );
+            return Ok(new { Token = "Token" });
         }
         [HttpPost]
         public async Task<IActionResult> LoginWithSigninManager(LoginDto request, CancellationToken cancellationToken)
@@ -106,29 +106,30 @@ namespace EFCoreIdentity.Controllers
                 return BadRequest(new { Message = "Kullanıcı Bulunamadı" });
             }
 
-            SignInResult res = await _signInManager.CheckPasswordSignInAsync(user, request.Password,true);
+            SignInResult res = await _signInManager.CheckPasswordSignInAsync(user, request.Password, true);
 
             if (res.IsLockedOut)
             {
-                TimeSpan? timeSpan = user.LockoutEnd-DateTime.Now;
+                TimeSpan? timeSpan = user.LockoutEnd - DateTime.Now;
                 if (timeSpan is not null)
                 {
-                    return StatusCode(500, $"şifrenizi 3 kere yanlış girdiğiniz için kullanıcınız {Math.Round(timeSpan.Value.TotalSeconds, MidpointRounding.AwayFromZero)} saniye girişe yasaklanmıştır. Süre bitiminde tekrar giriş yapabilirsiniz");
+                    return StatusCode(500, new { Message = $"şifrenizi 3 kere yanlış girdiğiniz için kullanıcınız {Math.Round(timeSpan.Value.TotalSeconds, MidpointRounding.AwayFromZero)} saniye girişe yasaklanmıştır. Süre bitiminde tekrar giriş yapabilirsiniz" });
                 }
                 else
                 {
-                    return StatusCode(500, $"şifrenizi 3 kere yanlış girdiğiniz için kullanıcınız 30 saniye girişe yasaklanmıştır. Süre bitiminde tekrar giriş yapabilirsiniz");
+                    return StatusCode(500, new { Message = $"şifrenizi 3 kere yanlış girdiğiniz için kullanıcınız 30 saniye girişe yasaklanmıştır. Süre bitiminde tekrar giriş yapabilirsiniz" });
                 }
             }
-            
+            if (res.IsNotAllowed)
+            {
+                return StatusCode(500, new { Message = "Mail adresiniz onaylı değil" });
+            }
+
             if (!res.Succeeded)
             {
                 return BadRequest(new { Message = "Kullanıcı adı veya şifre yanlış" });
             }
-            if (res.IsNotAllowed)
-            {
-                return StatusCode(500, "Mail adresiniz onaylı değil");
-            }
+
             return Ok(new { Token = "Token" });
         }
 
